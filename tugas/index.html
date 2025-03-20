@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Bank</title>
+</head>
+<body>
+    <h2>Simulasi Bank</h2>
+    <p>Saldo Anda: Rp. <span id="balanceAmount">10,000</span></p>
+    
+    <p id="message"></p>
+
+    <form id="transactionForm">
+        <label for="kode_transaksi">Jenis Transaksi:</label>
+        <select name="kode_transaksi" id="kode_transaksi">
+            <option value="0">Setor Uang</option>
+            <option value="1">Ambil Uang</option>
+        </select>
+        <br><br>
+        <label for="jumlah">Jumlah (Rp):</label>
+        <input type="number" name="jumlah" id="jumlah" required>
+        <br><br>
+        <button type="submit">Proses Transaksi</button>
+    </form>
+    <script>
+        function muatSaldo() {
+            fetch('api.php')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('balanceAmount').textContent =
+                        data.saldo.toLocaleString('id-ID');
+                });
+        }
+
+        document.getElementById('transactionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const dataFormulir = new FormData(this);
+            const jsonData = JSON.stringify(Object.fromEntries(dataFormulir));
+
+            fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: jsonData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('message').textContent = data.message;
+                    document.getElementById('message').style.display = 'block';
+                    document.getElementById('balanceAmount').textContent =
+                        data.saldo.toLocaleString('id-ID');
+                    document.getElementById('jumlah').value = '';
+                })
+                .catch(error => {
+                    console.error('Kesalahan:', error);
+                });
+        });
+
+        muatSaldo();
+    </script>
+    <p>Saldo minimum yang harus tersisa adalah Rp. 5,000</p>
+</body>
+</html>
